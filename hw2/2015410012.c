@@ -77,7 +77,7 @@ int main(int argc, char * argv[]) {
 
         uint8_t flag = buf[0];
         uint8_t op = buf[1];
-        uint16_t len = (buf[2] << 8) + buf[3];
+        uint16_t len = (buf[3] << 8) + buf[2];
         uint32_t data = (buf[8] << 24) + (buf[9] << 16) + (buf[10] << 8) + buf[11];
 
         printf("rcvd");
