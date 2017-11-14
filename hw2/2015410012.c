@@ -8,6 +8,25 @@
 #define SERVER_PORT 47500
 #define MAX_LINE 256
 
+#define FLAG_HELLO		((uint8_t)(0x01 << 7))
+#define FLAG_INSTRUCTION	((uint8_t)(0x01 << 6))
+#define FLAG_RESPONSE		((uint8_t)(0x01 << 5))
+#define FLAG_TERMINATE		((uint8_t)(0x01 << 4))
+
+#define OP_ECHO			((uint8_t)(0x00))
+#define OP_INCREMENT		((uint8_t)(0x01))
+#define OP_DECREMENT		((uint8_t)(0x02))
+
+struct hw_packet {
+  uint8_t  flag;
+  uint8_t  operation;
+  uint16_t data_len;
+  uint32_t seq_num;
+  uint8_t  data[1024];
+};
+
+void send_packet(int s, uint8_t flag, uint8_t op, uint16_t len, uint32_t seq, uint8_t *data);
+
 int main(int argc, char * argv[]) {
     FILE *fp;
     struct hostent *hp;
@@ -41,9 +60,81 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
 
-    int len = strlen(buf) + 1;
-    send(s, buf, len, 0);
+    //int len = strlen(buf) + 1;
+    //send(s, buf, len, 0);
+
+    uint8_t tmp[4];
+    uint32_t tmp2 = 2015410012;
+    memcpy(tmp, &tmp2, sizeof(uint32_t));
+    send_packet(s, FLAG_HELLO, OP_ECHO, 4, 0, tmp);
+
+    while(1) {
+        struct hw_packet rcvd_packet;
+        recv(s, (char*) &rcvd_packet, sizeof(struct hw_packet), 0);
+
+        printf("flag : %X\n", rcvd_packet.flag);
+        printf("op   : %X\n", rcvd_packet.operation);
+        printf("len  : %X\n", rcvd_packet.data_len);
+        printf("seq  : %X\n", rcvd_packet.seq_num);
+
+        printf("data : ");
+        int i;
+        for(i = 0; i < rcvd_packet.data_len; i++)
+            printf("%02X", rcvd_packet.data[i]);
+        printf("\n\n");
+
+        if(rcvd_packet.flag == FLAG_INSTRUCTION) {
+            uint32_t tmp = 0;
+            for(i = 0; i < rcvd_packet.data_len; i++) {
+                tmp += rcvd_packet.data[i] << (8*i);
+            }
+
+            printf("tmp : %u\n\n", tmp);
+
+            if(rcvd_packet.operation == OP_ECHO) {
+
+            } else if(rcvd_packet.operation == OP_INCREMENT) {
+                tmp += 1;
+                for(i = 0; i < rcvd_packet.data_len; i++) {
+                    rcvd_packet.data[3-i] = tmp % 0x100000000;
+                    tmp >>= 8;
+                }
+            } else if(rcvd_packet.operation == OP_DECREMENT) {
+                tmp -= 1;
+                for(i = 0; i < rcvd_packet.data_len; i++) {
+                    rcvd_packet.data[3-i] = tmp % 0x100000000;
+                    tmp >>= 8;
+                }
+            }
+
+            send_packet(s, FLAG_RESPONSE, rcvd_packet.operation, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
+        }
+
+        if(rcvd_packet.flag == FLAG_TERMINATE)
+            break;
+    }
 
     return 0;
 }
 
+void send_packet(int s, uint8_t flag, uint8_t op, uint16_t len, uint32_t seq, uint8_t *data) {
+    struct hw_packet buf_struct;
+    buf_struct.flag = flag;
+    buf_struct.operation = op;
+    buf_struct.data_len = len;
+    buf_struct.seq_num = seq;
+    memcpy(buf_struct.data, data, len);
+
+    printf("send flag : %X\n", buf_struct.flag);
+    printf("send op   : %X\n", buf_struct.operation);
+    printf("send len  : %X\n", buf_struct.data_len);
+    printf("send seq  : %X\n", buf_struct.seq_num);
+    printf("send data : ");
+    int i;
+    for(i = 0; i < buf_struct.data_len; i++)
+        printf("%02X", buf_struct.data[i]);
+    printf("\n\n");
+
+
+    send(s, (char*) &buf_struct, 8+buf_struct.data_len, 0);
+}
