@@ -85,17 +85,12 @@ int main(int argc, char * argv[]) {
         if(rcvd_packet.flag == FLAG_INSTRUCTION) {
 
             if(rcvd_packet.operation != OP_ECHO) {
-                rcvd_packet.data[0] += (rcvd_packet.operation == OP_INCREMENT) ? 1 : -1;
+                uint32_t tmp;
+                memcpy(&tmp, rcvd_packet.data, sizeof(uint32_t));
 
-                uint8_t tmp;
+                tmp += (rcvd_packet.operation == OP_INCREMENT) ? 1 : -1;
 
-                tmp = rcvd_packet.data[0];
-                rcvd_packet.data[0] = rcvd_packet.data[3];
-                rcvd_packet.data[3] = tmp;
-
-                tmp = rcvd_packet.data[1];
-                rcvd_packet.data[1] = rcvd_packet.data[2];
-                rcvd_packet.data[2] = tmp;
+                memcpy(rcvd_packet.data, &tmp, sizeof(uint32_t));
             }
 
             send_packet(s, FLAG_RESPONSE, rcvd_packet.operation, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
@@ -127,5 +122,5 @@ void send_packet(int s, uint8_t flag, uint8_t op, uint16_t len, uint32_t seq, ui
     printf("\n\n");
 
 
-    send(s, (char*) &buf_struct, 8+buf_struct.data_len, 0);
+    send(s, (char*) &buf_struct, sizeof(struct hw_packet), 0);
 }
