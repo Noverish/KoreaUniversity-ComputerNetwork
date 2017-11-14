@@ -93,7 +93,7 @@ int main(int argc, char * argv[]) {
                 memcpy(rcvd_packet.data, &tmp, sizeof(uint32_t));
             }
 
-            send_packet(s, FLAG_RESPONSE, FLAG_HELLO, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
+            send_packet(s, FLAG_RESPONSE, OP_ECHO, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
         }
 
         if(rcvd_packet.flag == FLAG_TERMINATE)
