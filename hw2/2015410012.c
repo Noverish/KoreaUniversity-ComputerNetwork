@@ -84,27 +84,9 @@ int main(int argc, char * argv[]) {
         printf("\n\n");
 
         if(rcvd_packet.flag == FLAG_INSTRUCTION) {
-            uint32_t tmp = 0;
-            for(i = 0; i < rcvd_packet.data_len; i++) {
-                tmp += rcvd_packet.data[i] << (8*i);
-            }
 
-            printf("tmp : %u\n\n", tmp);
-
-            if(rcvd_packet.operation == OP_ECHO) {
-
-            } else if(rcvd_packet.operation == OP_INCREMENT) {
-                tmp += 1;
-                for(i = 0; i < rcvd_packet.data_len; i++) {
-                    rcvd_packet.data[3-i] = tmp % 0x100000000;
-                    tmp >>= 8;
-                }
-            } else if(rcvd_packet.operation == OP_DECREMENT) {
-                tmp -= 1;
-                for(i = 0; i < rcvd_packet.data_len; i++) {
-                    rcvd_packet.data[3-i] = tmp % 0x100000000;
-                    tmp >>= 8;
-                }
+            if(rcvd_packet.operation != OP_ECHO) {
+                rcvd_packet.data[8] += (rcvd_packet.operation == OP_INCREMENT) 1 : -1;
             }
 
             send_packet(s, FLAG_RESPONSE, rcvd_packet.operation, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
