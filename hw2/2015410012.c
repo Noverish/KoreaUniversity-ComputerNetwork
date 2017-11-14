@@ -33,7 +33,7 @@ int main(int argc, char * argv[]) {
     struct sockaddr_in sin;
     char *host = "localhost";
     char buf[] = "2015410012";
-    int s, i;
+    int s;
 
     /* translate host name into peer's IP address */
     hp = gethostbyname(host);
@@ -77,6 +77,7 @@ int main(int argc, char * argv[]) {
         printf("rcvd len  : %X\n", rcvd_packet.data_len);
         printf("rcvd seq  : %X\n", rcvd_packet.seq_num);
         printf("rcvd data : ");
+        int i;
         for(i = 0; i < rcvd_packet.data_len; i++)
             printf("%02X", rcvd_packet.data[i]);
         printf("\n\n");
@@ -110,6 +111,7 @@ void send_packet(int s, uint8_t flag, uint8_t op, uint16_t len, uint32_t seq, ui
     printf("send len  : %X\n", buf_struct.data_len);
     printf("send seq  : %X\n", buf_struct.seq_num);
     printf("send data : ");
+    int i;
     for(i = 0; i < buf_struct.data_len; i++)
         printf("%02X", buf_struct.data[i]);
     printf("\n\n");
