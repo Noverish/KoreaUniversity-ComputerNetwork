@@ -33,7 +33,7 @@ int main(int argc, char * argv[]) {
     struct sockaddr_in sin;
     char *host = "localhost";
     char buf[] = "2015410012";
-    int s;
+    int s, i;
 
     /* translate host name into peer's IP address */
     hp = gethostbyname(host);
@@ -72,13 +72,11 @@ int main(int argc, char * argv[]) {
         struct hw_packet rcvd_packet;
         recv(s, (char*) &rcvd_packet, sizeof(struct hw_packet), 0);
 
-        printf("flag : %X\n", rcvd_packet.flag);
-        printf("op   : %X\n", rcvd_packet.operation);
-        printf("len  : %X\n", rcvd_packet.data_len);
-        printf("seq  : %X\n", rcvd_packet.seq_num);
-
-        printf("data : ");
-        int i;
+        printf("rcvd flag : %X\n", rcvd_packet.flag);
+        printf("rcvd op   : %X\n", rcvd_packet.operation);
+        printf("rcvd len  : %X\n", rcvd_packet.data_len);
+        printf("rcvd seq  : %X\n", rcvd_packet.seq_num);
+        printf("rcvd data : ");
         for(i = 0; i < rcvd_packet.data_len; i++)
             printf("%02X", rcvd_packet.data[i]);
         printf("\n\n");
@@ -86,7 +84,7 @@ int main(int argc, char * argv[]) {
         if(rcvd_packet.flag == FLAG_INSTRUCTION) {
 
             if(rcvd_packet.operation != OP_ECHO) {
-                rcvd_packet.data[8] += (rcvd_packet.operation == OP_INCREMENT) ? 1 : -1;
+                rcvd_packet.data[0] += (rcvd_packet.operation == OP_INCREMENT) ? 1 : -1;
             }
 
             send_packet(s, FLAG_RESPONSE, rcvd_packet.operation, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
@@ -112,7 +110,6 @@ void send_packet(int s, uint8_t flag, uint8_t op, uint16_t len, uint32_t seq, ui
     printf("send len  : %X\n", buf_struct.data_len);
     printf("send seq  : %X\n", buf_struct.seq_num);
     printf("send data : ");
-    int i;
     for(i = 0; i < buf_struct.data_len; i++)
         printf("%02X", buf_struct.data[i]);
     printf("\n\n");
