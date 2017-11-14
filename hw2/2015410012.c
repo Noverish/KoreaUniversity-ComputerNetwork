@@ -84,7 +84,7 @@ int main(int argc, char * argv[]) {
         for(i = 0; i < len + 8; i++) {
             if(i%4 == 0)
                 printf("\n");
-            printf("%X", buf[i]);
+            printf("%02X", buf[i]);
         }
         printf("\n\n");
 
