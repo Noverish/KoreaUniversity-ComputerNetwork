@@ -87,10 +87,15 @@ int main(int argc, char * argv[]) {
             if(rcvd_packet.operation != OP_ECHO) {
                 rcvd_packet.data[0] += (rcvd_packet.operation == OP_INCREMENT) ? 1 : -1;
 
-                rcvd_packet.data[3] = rcvd_packet.data[0];
-                rcvd_packet.data[2] = rcvd_packet.data[1];
-                rcvd_packet.data[1] = rcvd_packet.data[2];
+                uint8_t tmp;
+
+                tmp = rcvd_packet.data[0];
                 rcvd_packet.data[0] = rcvd_packet.data[3];
+                rcvd_packet.data[3] = tmp;
+
+                tmp = rcvd_packet.data[1];
+                rcvd_packet.data[1] = rcvd_packet.data[2];
+                rcvd_packet.data[2] = tmp;
             }
 
             send_packet(s, FLAG_RESPONSE, rcvd_packet.operation, rcvd_packet.data_len, rcvd_packet.seq_num, rcvd_packet.data);
