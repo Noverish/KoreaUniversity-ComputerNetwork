@@ -72,10 +72,10 @@ int main(int argc, char * argv[]) {
         struct hw_packet rcvd_packet;
         recv(s, (char*) &rcvd_packet, sizeof(struct hw_packet), 0);
 
-        printf("rcvd flag : %X\n", rcvd_packet.flag);
-        printf("rcvd op   : %X\n", rcvd_packet.operation);
-        printf("rcvd len  : %X\n", rcvd_packet.data_len);
-        printf("rcvd seq  : %X\n", rcvd_packet.seq_num);
+        printf("rcvd flag : %02X\n", rcvd_packet.flag);
+        printf("rcvd op   : %02X\n", rcvd_packet.operation);
+        printf("rcvd len  : %04X\n", rcvd_packet.data_len);
+        printf("rcvd seq  : %08X\n", rcvd_packet.seq_num);
         printf("rcvd data : ");
         int i;
         for(i = 0; i < rcvd_packet.data_len; i++)
@@ -111,10 +111,10 @@ void send_packet(int s, uint8_t flag, uint8_t op, uint16_t len, uint32_t seq, ui
     buf_struct.seq_num = seq;
     memcpy(buf_struct.data, data, len);
 
-    printf("send flag : %X\n", buf_struct.flag);
-    printf("send op   : %X\n", buf_struct.operation);
-    printf("send len  : %X\n", buf_struct.data_len);
-    printf("send seq  : %X\n", buf_struct.seq_num);
+    printf("send flag : %02X\n", buf_struct.flag);
+    printf("send op   : %02X\n", buf_struct.operation);
+    printf("send len  : %04X\n", buf_struct.data_len);
+    printf("send seq  : %08X\n", buf_struct.seq_num);
     printf("send data : ");
     int i;
     for(i = 0; i < buf_struct.data_len; i++)
