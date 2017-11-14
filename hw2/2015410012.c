@@ -111,7 +111,7 @@ int main(int argc, char * argv[]) {
             send(s, buf, len + 8, 0);
         }
 
-        if(rcvd_packet.flag == FLAG_TERMINATE)
+        if(flag == FLAG_TERMINATE)
             break;
     }
 
